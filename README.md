@@ -35,4 +35,5 @@ Yet another **line**.
 -->
 ```
 
+<img width="771" alt="Example output" src="https://user-images.githubusercontent.com/4161235/220068655-96b89372-784e-4a12-8ef0-8f15b7d0c557.png">
 
