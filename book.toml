@@ -1,0 +1,6 @@
+[book]
+authors = ["Raz"]
+language = "en"
+multilingual = false
+src = "src"
+title = "mdbook-private"
