@@ -1,6 +1,10 @@
 # mdbook-private
 
-*A preprocessor for [mdbook](https://github.com/rust-lang-nursery/mdBook) that allows for private sections to be hidden or kept.*
+[![crate.io](https://img.shields.io/crates/v/mdbook-private)](https://crates.io/crates/mdbook-private)
+[![downloads](https://img.shields.io/crates/d/mdbook-private)](https://crates.io/crates/mdbook-private)
+[![license](https://img.shields.io/github/license/RealAtix/mdbook-private)](LICENSE)
+
+> A preprocessor for [mdbook](https://github.com/rust-lang-nursery/mdBook) that allows for private sections to be hidden or kept.
 
 ## Usage
 
