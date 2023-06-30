@@ -59,9 +59,9 @@ impl Preprocessor for Private {
             if let BookItem::Chapter(ref mut chapter) = *item {
                 info!("Processing chapter '{}'", &chapter.name);
                 let result = if remove {
-                    RE.replace(chapter.content.as_str(), "")
+                    RE.replace_all(chapter.content.as_str(), "")
                 } else {
-                    RE.replace(chapter.content.as_str(), |caps: &Captures| {
+                    RE.replace_all(chapter.content.as_str(), |caps: &Captures| {
                         if style {
                             format!(
                                 "<blockquote style='{}'><span style='{}'>{}</span>{}</blockquote>",
