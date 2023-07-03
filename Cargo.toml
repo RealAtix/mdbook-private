@@ -1,6 +1,6 @@
 [package]
 name = "mdbook-private"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Razvan Nicolescu <raz@raztech.io"]
 description = "A preprocessor for mdbook that allows for private sections to be hidden or kept"
@@ -9,11 +9,11 @@ repository = "https://github.com/RealAtix/mdbook-private"
 
 
 [dependencies]
-clap = "4.1.6"
+clap = "4.3.10"
 env_logger = "0.10.0"
 lazy_static = "1.4.0"
 log = "0.4.17"
-mdbook = "0.4.27"
-regex = "1.7.1"
-semver = "1.0.16"
-serde_json = "1.0.93"
+mdbook = "0.4.31"
+regex = "1.8.4"
+semver = "1.0.17"
+serde_json = "1.0.99"

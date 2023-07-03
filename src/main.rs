@@ -1,5 +1,3 @@
-// nop-preprocessors.rs
-
 use clap::{Arg, ArgMatches, Command};
 use log::{error, warn};
 use mdbook::errors::Error;
