@@ -52,7 +52,7 @@ impl Preprocessor for Private {
         }
 
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"<!--private[\r?\n]((?s).*?)[\r?\n]-->").unwrap();
+            static ref RE: Regex = Regex::new(r"<!--\s*private\b((?s).*?)-->").unwrap();
         }
 
         book.for_each_mut(|item: &mut BookItem| {
