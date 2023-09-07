@@ -55,6 +55,7 @@ impl Preprocessor for Private {
             static ref RE: Regex = Regex::new(r"<!--\s*private\b\s*[\r?\n]?((?s).*?)[\r?\n]?\s*-->").unwrap();
         }
 
+        // Handle private content blocks
         book.for_each_mut(|item: &mut BookItem| {
             if let BookItem::Chapter(ref mut chapter) = *item {
                 info!("Processing chapter '{}'", &chapter.name);
@@ -77,11 +78,53 @@ impl Preprocessor for Private {
             }
         });
 
+        // Handle private chapters
+        if remove {
+            let mut private_book = Book::new();
+            book.sections
+                .iter()
+                .filter_map(|section| process_item(section.clone()))
+                .for_each(|item| {
+                    private_book.push_item(item);
+                });
+
+            return Ok(private_book);
+        }
+
         Ok(book)
     }
 
     fn supports_renderer(&self, renderer: &str) -> bool {
         renderer != "not-supported"
+    }
+}
+
+fn process_item(item: BookItem) -> Option<BookItem> {
+    match item {
+        BookItem::Chapter(ch) => {
+            if ch
+                .source_path
+                .as_ref()?
+                .file_name()?
+                .to_str()?
+                .starts_with("_")
+            {
+                info!("Deleting chapter {}", ch.source_path.as_ref()?.display());
+                return None;
+            }
+
+            let mut private_ch = ch.clone();
+            private_ch.sub_items.clear();
+
+            for sub in &ch.sub_items {
+                if let Some(processed_sub) = process_item(sub.clone()) {
+                    private_ch.sub_items.push(processed_sub);
+                }
+            }
+
+            Some(BookItem::Chapter(private_ch))
+        }
+        _ => Some(item),
     }
 }
 
