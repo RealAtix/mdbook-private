@@ -35,6 +35,7 @@ impl Preprocessor for Private {
         let mut remove = false;
         let mut style = true;
         let mut notice = "CONFIDENTIAL";
+        let mut prefix = "_";
         if let Some(private_cfg) = ctx.config.get_preprocessor(self.name()) {
             if private_cfg.contains_key("remove") {
                 let cfg_remove = private_cfg.get("remove").unwrap();
@@ -49,10 +50,15 @@ impl Preprocessor for Private {
                     notice = cfg_notice.as_str().unwrap();
                 }
             }
+            if private_cfg.contains_key("chapter-prefix") {
+                let cfg_prefix = private_cfg.get("chapter-prefix").unwrap();
+                prefix = cfg_prefix.as_str().unwrap();
+            }
         }
 
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"<!--\s*private\b\s*[\r?\n]?((?s).*?)[\r?\n]?\s*-->").unwrap();
+            static ref RE: Regex =
+                Regex::new(r"<!--\s*private\b\s*[\r?\n]?((?s).*?)[\r?\n]?\s*-->").unwrap();
         }
 
         // Handle private content blocks
@@ -83,7 +89,7 @@ impl Preprocessor for Private {
             let mut private_book = Book::new();
             book.sections
                 .iter()
-                .filter_map(|section| process_item(section.clone()))
+                .filter_map(|section| process_item(section.clone(), prefix))
                 .for_each(|item| {
                     private_book.push_item(item);
                 });
@@ -99,7 +105,7 @@ impl Preprocessor for Private {
     }
 }
 
-fn process_item(item: BookItem) -> Option<BookItem> {
+fn process_item(item: BookItem, prefix: &str) -> Option<BookItem> {
     match item {
         BookItem::Chapter(ch) => {
             if ch
@@ -107,7 +113,7 @@ fn process_item(item: BookItem) -> Option<BookItem> {
                 .as_ref()?
                 .file_name()?
                 .to_str()?
-                .starts_with("_")
+                .starts_with(prefix)
             {
                 info!("Deleting chapter {}", ch.source_path.as_ref()?.display());
                 return None;
@@ -117,7 +123,7 @@ fn process_item(item: BookItem) -> Option<BookItem> {
             private_ch.sub_items.clear();
 
             for sub in &ch.sub_items {
-                if let Some(processed_sub) = process_item(sub.clone()) {
+                if let Some(processed_sub) = process_item(sub.clone(), prefix) {
                     private_ch.sub_items.push(processed_sub);
                 }
             }
@@ -384,6 +390,7 @@ mod test {
                     "__non_exhaustive": null
                 }
             ]"##;
+
         let input_json = input_json.as_bytes();
         let output_json = output_json.as_bytes();
 
@@ -484,4 +491,286 @@ mod test {
         assert_eq!(actual_book, expected_book);
     }
 
+    #[test]
+    fn private_keep_chapters_run() {
+        let input_json = r##"[
+              {
+                "root": "/path/to/book",
+                "config": {
+                    "book": {
+                        "authors": ["AUTHOR"],
+                        "language": "en",
+                        "multilingual": false,
+                        "src": "src",
+                        "title": "TITLE"
+                    },
+                    "preprocessor": {
+                        "private": {}
+                    }
+                },
+                "renderer": "html",
+                "mdbook_version": "0.4.32"
+              },
+              {
+                "sections": [
+                  {
+                    "Chapter": {
+                      "name": "Chapter 1",
+                      "content": "# Chapter 1\n\nThis chapter will always be present\n\n<!--private\nThis is some highly confidential material which we want to remove when sharing with external parties.\n\nAnother *line*.\n\n# A title that should remain a title  \nYet another **line**.\n-->\n",
+                      "number": [1],
+                      "sub_items": [
+                        {
+                          "Chapter": {
+                            "name": "Sub chapter",
+                            "content": "# Subchapter\n\nThis chapter will be removed if private is enabled\n",
+                            "number": [1, 1],
+                            "sub_items": [],
+                            "path": "_chapter_1_sub.md",
+                            "source_path": "_chapter_1_sub.md",
+                            "parent_names": ["Chapter 1"]
+                          }
+                        }
+                      ],
+                      "path": "chapter_1.md",
+                      "source_path": "chapter_1.md",
+                      "parent_names": []
+                    }
+                  },
+                  {
+                    "Chapter": {
+                      "name": "Chapter 2",
+                      "content": "# Chapter 2\n\nThis chapter and it's subchapters will be removed if private is enabled\n",
+                      "number": [2],
+                      "sub_items": [
+                        {
+                          "Chapter": {
+                            "name": "Sub chapter",
+                            "content": "# Subchapter\n\nThis will be removed if private is enabled because it's parent chapter is set to be removed.\n",
+                            "number": [2, 1],
+                            "sub_items": [],
+                            "path": "chapter_2_sub.md",
+                            "source_path": "chapter_2_sub.md",
+                            "parent_names": ["Chapter 2"]
+                          }
+                        }
+                      ],
+                      "path": "_chapter_2.md",
+                      "source_path": "_chapter_2.md",
+                      "parent_names": []
+                    }
+                  }
+                ],
+                "__non_exhaustive": null
+              }
+            ]"##;
+        let output_json = r##"[
+              {
+                "root": "/path/to/book",
+                "config": {
+                    "book": {
+                        "authors": ["AUTHOR"],
+                        "language": "en",
+                        "multilingual": false,
+                        "src": "src",
+                        "title": "TITLE"
+                    },
+                    "preprocessor": {
+                        "private": {}
+                    }
+                },
+                "renderer": "html",
+                "mdbook_version": "0.4.32"
+              },
+              {
+                "sections": [
+                  {
+                    "Chapter": {
+                      "name": "Chapter 1",
+                      "content": "# Chapter 1\n\nThis chapter will always be present\n\n<blockquote style='position: relative; padding: 20px 20px;'><span style='position: absolute; top: 0; right: 5px; font-size: 80%; opacity: 0.4;'>CONFIDENTIAL</span>This is some highly confidential material which we want to remove when sharing with external parties.\n\nAnother *line*.\n\n# A title that should remain a title  \nYet another **line**.</blockquote>\n",
+                      "number": [1],
+                      "sub_items": [
+                        {
+                          "Chapter": {
+                            "name": "Sub chapter",
+                            "content": "# Subchapter\n\nThis chapter will be removed if private is enabled\n",
+                            "number": [1, 1],
+                            "sub_items": [],
+                            "path": "_chapter_1_sub.md",
+                            "source_path": "_chapter_1_sub.md",
+                            "parent_names": ["Chapter 1"]
+                          }
+                        }
+                      ],
+                      "path": "chapter_1.md",
+                      "source_path": "chapter_1.md",
+                      "parent_names": []
+                    }
+                  },
+                  {
+                    "Chapter": {
+                      "name": "Chapter 2",
+                      "content": "# Chapter 2\n\nThis chapter and it's subchapters will be removed if private is enabled\n",
+                      "number": [2],
+                      "sub_items": [
+                        {
+                          "Chapter": {
+                            "name": "Sub chapter",
+                            "content": "# Subchapter\n\nThis will be removed if private is enabled because it's parent chapter is set to be removed.\n",
+                            "number": [2, 1],
+                            "sub_items": [],
+                            "path": "chapter_2_sub.md",
+                            "source_path": "chapter_2_sub.md",
+                            "parent_names": ["Chapter 2"]
+                          }
+                        }
+                      ],
+                      "path": "_chapter_2.md",
+                      "source_path": "_chapter_2.md",
+                      "parent_names": []
+                    }
+                  }
+                ],
+                "__non_exhaustive": null
+              }
+            ]"##;
+
+        let input_json = input_json.as_bytes();
+        let output_json = output_json.as_bytes();
+
+        let (ctx, book) = mdbook::preprocess::CmdPreprocessor::parse_input(input_json).unwrap();
+        let (_, expected_book) =
+            mdbook::preprocess::CmdPreprocessor::parse_input(output_json).unwrap();
+
+        let result = Private::new().run(&ctx, book);
+        assert!(result.is_ok());
+
+        let actual_book = result.unwrap();
+        assert_eq!(actual_book, expected_book);
+    }
+
+    #[test]
+    fn private_remove_chapters_run() {
+        let input_json = r##"[
+              {
+                "root": "/path/to/book",
+                "config": {
+                    "book": {
+                        "authors": ["AUTHOR"],
+                        "language": "en",
+                        "multilingual": false,
+                        "src": "src",
+                        "title": "TITLE"
+                    },
+                    "preprocessor": {
+                        "private": {
+                            "remove": true
+                        }
+                    }
+                },
+                "renderer": "html",
+                "mdbook_version": "0.4.32"
+              },
+              {
+                "sections": [
+                  {
+                    "Chapter": {
+                      "name": "Chapter 1",
+                      "content": "# Chapter 1\n\nThis chapter will always be present\n\n<!--private\nThis is some highly confidential material which we want to remove when sharing with external parties.\n\nAnother *line*.\n\n# A title that should remain a title  \nYet another **line**.\n-->\n",
+                      "number": [1],
+                      "sub_items": [
+                        {
+                          "Chapter": {
+                            "name": "Sub chapter",
+                            "content": "# Subchapter\n\nThis chapter will be removed if private is enabled\n",
+                            "number": [1, 1],
+                            "sub_items": [],
+                            "path": "_chapter_1_sub.md",
+                            "source_path": "_chapter_1_sub.md",
+                            "parent_names": ["Chapter 1"]
+                          }
+                        }
+                      ],
+                      "path": "chapter_1.md",
+                      "source_path": "chapter_1.md",
+                      "parent_names": []
+                    }
+                  },
+                  {
+                    "Chapter": {
+                      "name": "Chapter 2",
+                      "content": "# Chapter 2\n\nThis chapter and it's subchapters will be removed if private is enabled\n",
+                      "number": [2],
+                      "sub_items": [
+                        {
+                          "Chapter": {
+                            "name": "Sub chapter",
+                            "content": "# Subchapter\n\nThis will be removed if private is enabled because it's parent chapter is set to be removed.\n",
+                            "number": [2, 1],
+                            "sub_items": [],
+                            "path": "chapter_2_sub.md",
+                            "source_path": "chapter_2_sub.md",
+                            "parent_names": ["Chapter 2"]
+                          }
+                        }
+                      ],
+                      "path": "_chapter_2.md",
+                      "source_path": "_chapter_2.md",
+                      "parent_names": []
+                    }
+                  }
+                ],
+                "__non_exhaustive": null
+              }
+            ]"##;
+        let output_json = r##"[
+              {
+                "root": "/path/to/book",
+                "config": {
+                    "book": {
+                        "authors": ["AUTHOR"],
+                        "language": "en",
+                        "multilingual": false,
+                        "src": "src",
+                        "title": "TITLE"
+                    },
+                    "preprocessor": {
+                        "private": {
+                            "remove": true
+                        }
+                    }
+                },
+                "renderer": "html",
+                "mdbook_version": "0.4.32"
+              },
+              {
+                "sections": [
+                  {
+                    "Chapter": {
+                      "name": "Chapter 1",
+                      "content": "# Chapter 1\n\nThis chapter will always be present\n\n\n",
+                      "number": [1],
+                      "sub_items": [],
+                      "path": "chapter_1.md",
+                      "source_path": "chapter_1.md",
+                      "parent_names": []
+                    }
+                  }
+                ],
+                "__non_exhaustive": null
+              }
+            ]"##;
+
+        let input_json = input_json.as_bytes();
+        let output_json = output_json.as_bytes();
+
+        let (ctx, book) = mdbook::preprocess::CmdPreprocessor::parse_input(input_json).unwrap();
+        let (_, expected_book) =
+            mdbook::preprocess::CmdPreprocessor::parse_input(output_json).unwrap();
+
+        let result = Private::new().run(&ctx, book);
+        assert!(result.is_ok());
+
+        let actual_book = result.unwrap();
+        assert_eq!(actual_book, expected_book);
+    }
 }

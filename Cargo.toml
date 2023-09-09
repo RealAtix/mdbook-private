@@ -9,11 +9,11 @@ repository = "https://github.com/RealAtix/mdbook-private"
 
 
 [dependencies]
-clap = "4.3.10"
+clap = "4.4.2"
 env_logger = "0.10.0"
 lazy_static = "1.4.0"
-log = "0.4.17"
-mdbook = "0.4.31"
-regex = "1.8.4"
-semver = "1.0.17"
-serde_json = "1.0.99"
+log = "0.4.20"
+mdbook = "0.4.34"
+regex = "1.9.5"
+semver = "1.0.18"
+serde_json = "1.0.105"
