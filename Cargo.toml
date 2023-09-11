@@ -1,9 +1,9 @@
 [package]
 name = "mdbook-private"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Razvan Nicolescu <raz@raztech.io"]
-description = "A preprocessor for mdbook that allows for private sections to be hidden or kept"
+description = "An mdbook preprocessor that controls visibility of private chapters and sections within them"
 license = "MPL-2.0"
 repository = "https://github.com/RealAtix/mdbook-private"
 

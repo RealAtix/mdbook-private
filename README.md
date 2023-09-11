@@ -5,7 +5,7 @@
 [![downloads](https://img.shields.io/crates/d/mdbook-private)](https://crates.io/crates/mdbook-private)
 [![license](https://img.shields.io/github/license/RealAtix/mdbook-private)](LICENSE)
 
-> An [mdbook](https://github.com/rust-lang-nursery/mdBook) preprocessor for defining and optionally hiding private sections in your book.
+> An [mdbook](https://github.com/rust-lang-nursery/mdBook) preprocessor for defining and optionally hiding private sections and chapters in your book.
 
 ## Usage
 
