@@ -21,7 +21,7 @@ cargo install mdbook-private
 remove = false
 style = true
 notice = "CONFIDENTIAL"
-chapter-suffix = "_"
+chapter-prefix = "_"
 ```
 
 **Options Explained**
