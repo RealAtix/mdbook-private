@@ -21,7 +21,7 @@ fn main() {
     env_logger::try_init().unwrap();
     let matches = make_app().get_matches();
 
-    let preprocessor = Private::default();
+    let preprocessor = Private;
 
     if let Some(sub_args) = matches.subcommand_matches("supports") {
         handle_supports(&preprocessor, sub_args);
