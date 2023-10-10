@@ -1,6 +1,6 @@
 [package]
 name = "mdbook-private"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["Razvan Nicolescu <raz@raztech.io"]
 description = "An mdbook preprocessor that controls visibility of private chapters and sections within them"
@@ -9,11 +9,11 @@ repository = "https://github.com/RealAtix/mdbook-private"
 
 
 [dependencies]
-clap = "4.4.2"
+clap = "4.4.6"
 env_logger = "0.10.0"
 lazy_static = "1.4.0"
 log = "0.4.20"
-mdbook = "0.4.34"
-regex = "1.9.5"
-semver = "1.0.18"
-serde_json = "1.0.105"
+mdbook = "0.4.35"
+regex = "1.10.0"
+semver = "1.0.20"
+serde_json = "1.0.107"
