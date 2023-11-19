@@ -59,7 +59,7 @@ impl Preprocessor for Private {
 
         lazy_static! {
             static ref RE: Regex =
-                Regex::new(r"<!--\s*private\b\s*[\r?\n]?((?s).*?)[\r?\n]?\s*-->").unwrap();
+                Regex::new(r"<!--\s*private\b\s*[\r?\n]?((?s).*?)[\r?\n]?\s*-->[\r?\n]?").unwrap();
         }
 
         // Handle private content blocks
@@ -72,11 +72,11 @@ impl Preprocessor for Private {
                     RE.replace_all(chapter.content.as_str(), |caps: &Captures| {
                         if style {
                             format!(
-                                "<blockquote style='{}'><span style='{}'>{}</span>{}</blockquote>",
+                                "<blockquote style='{}'><span style='{}'>{}</span>{}</blockquote>\n",
                                 &STYLE_CONTENT, STYLE_NOTICE, &notice, &caps[1]
                             )
                         } else {
-                            caps[1].to_string()
+                            caps[1].to_string() + "\n"
                         }
                     })
                 };
@@ -225,7 +225,7 @@ mod test {
                         {
                             "Chapter": {
                                 "name": "Chapter 1",
-                                "content": "# Chapter 1\n\nThe End",
+                                "content": "# Chapter 1\nThe End",
                                 "number": [1],
                                 "sub_items": [],
                                 "path": "chapter_1.md",
@@ -401,7 +401,7 @@ mod test {
                         {
                             "Chapter": {
                                 "name": "Chapter 1",
-                                "content": "# Chapter 1\n\nThe End",
+                                "content": "# Chapter 1\nThe End",
                                 "number": [1],
                                 "sub_items": [],
                                 "path": "chapter_1.md",
@@ -770,7 +770,7 @@ mod test {
                   {
                     "Chapter": {
                       "name": "Chapter 1",
-                      "content": "# Chapter 1\n\nThis chapter will always be present\n\n\n",
+                      "content": "# Chapter 1\n\nThis chapter will always be present\n\n",
                       "number": [1],
                       "sub_items": [],
                       "path": "chapter_1.md",
@@ -918,7 +918,7 @@ mod test {
                   {
                     "Chapter": {
                       "name": "Chapter 1",
-                      "content": "# Chapter 1\n\nThis chapter will always be present\n\n\n",
+                      "content": "# Chapter 1\n\nThis chapter will always be present\n\n",
                       "number": [1],
                       "sub_items": [
                         {
