@@ -108,6 +108,7 @@ impl Preprocessor for Private {
     }
 }
 
+/// Align section numbers with visible sections
 fn update_section_numbers(book: &mut Book) {
     let mut current_number: Vec<u32> = Vec::new();
 
@@ -116,11 +117,14 @@ fn update_section_numbers(book: &mut Book) {
 
         for item in chapters.iter_mut() {
             if let BookItem::Chapter(ref mut chapter) = item {
-                current_number.push(section_counter);
-                chapter.number = Some(SectionNumber(current_number.clone()));
-                update_chapter_numbers(&mut chapter.sub_items, current_number);
-                current_number.pop();
-                section_counter += 1;
+                if chapter.number.is_some() {
+                    // Only renumber numbered chapters
+                    current_number.push(section_counter);
+                    chapter.number = Some(SectionNumber(current_number.clone()));
+                    update_chapter_numbers(&mut chapter.sub_items, current_number);
+                    current_number.pop();
+                    section_counter += 1;
+                }
             }
         }
     }
@@ -821,6 +825,17 @@ mod test {
               },
               {
                 "sections": [
+                  { 
+                    "Chapter": {
+                      "name": "Intro",
+                      "content": "# Intro\n\nIntroduction prefix chapter\n\n<!--private\nSecret stuff\n-->\n",
+                      "number": null,
+                      "sub_items": [],
+                      "path": "intro.md",
+                      "source_path": "intro.md",
+                      "parent_names": []
+                    }
+                  },
                   {
                     "Chapter": {
                       "name": "Chapter 1",
@@ -915,6 +930,17 @@ mod test {
               },
               {
                 "sections": [
+                  {
+                    "Chapter": {
+                      "name": "Intro",
+                      "content": "# Intro\n\nIntroduction prefix chapter\n\n",
+                      "number": null,
+                      "sub_items": [],
+                      "path": "intro.md",
+                      "source_path": "intro.md",
+                      "parent_names": []
+                    }
+                  },
                   {
                     "Chapter": {
                       "name": "Chapter 1",
