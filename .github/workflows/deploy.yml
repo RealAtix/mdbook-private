@@ -56,7 +56,7 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: false
-      - uses: actions/upload-release-asset@v4
+      - uses: actions/upload-release-asset@v1
         id: upload-release-asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -93,7 +93,7 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: false
-      - uses: actions/upload-release-asset@v4
+      - uses: actions/upload-release-asset@v1
         id: upload-release-asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
