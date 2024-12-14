@@ -12,7 +12,7 @@ jobs:
   install-cross:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50
       - uses: XAMPPRocky/get-github-release@v1
@@ -22,13 +22,13 @@ jobs:
           repo: cross
           matches: ${{ matrix.platform }}
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: cross-${{ matrix.platform }}
           path: ${{ steps.cross.outputs.install_path }}
     strategy:
       matrix:
-        platform: [ linux-musl, apple-darwin ]
+        platform: [linux-musl, apple-darwin]
 
   windows:
     runs-on: windows-latest
@@ -39,7 +39,7 @@ jobs:
           - x86_64-pc-windows-gnu
           - x86_64-pc-windows-msvc
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: bash .github/scripts/set_rust_version.bash stable ${{ matrix.target }}
       - run: bash .github/scripts/build.bash cargo ${{ matrix.target }} RELEASE
       - run: |
@@ -56,7 +56,7 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: false
-      - uses: actions/upload-release-asset@v1
+      - uses: actions/upload-release-asset@v4
         id: upload-release-asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -74,8 +74,8 @@ jobs:
         target:
           - x86_64-apple-darwin
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v1
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
           name: cross-apple-darwin
           path: /usr/local/bin/
@@ -93,7 +93,7 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: false
-      - uses: actions/upload-release-asset@v1
+      - uses: actions/upload-release-asset@v4
         id: upload-release-asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -112,8 +112,8 @@ jobs:
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v1
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
           name: cross-linux-musl
           path: /tmp/
