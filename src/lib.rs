@@ -1,4 +1,5 @@
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
+
 use log::info;
 use mdbook::book::Book;
 use mdbook::book::SectionNumber;
@@ -57,10 +58,9 @@ impl Preprocessor for Private {
             }
         }
 
-        lazy_static! {
-            static ref RE: Regex =
-                Regex::new(r"<!--\s*private\b\s*[\r?\n]?((?s).*?)[\r?\n]?\s*-->[\r?\n]?").unwrap();
-        }
+        static RE: LazyLock<Regex> = LazyLock::new(|| {
+            Regex::new(r"<!--\s*private\b\s*[\r?\n]?((?s).*?)[\r?\n]?\s*-->[\r?\n]?").unwrap()
+        });
 
         // Handle private content blocks
         book.for_each_mut(|item: &mut BookItem| {
